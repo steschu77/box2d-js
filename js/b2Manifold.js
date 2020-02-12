@@ -43,7 +43,7 @@ class b2Manifold {
     this.body1 = body1;
     this.body2 = body2;
     this.contacts = [];
-    this.friction = 0.3;
+    this.friction = Math.sqrt(body1.friction * body2.friction);
   }
 
   update(old_m) {

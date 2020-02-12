@@ -58,8 +58,11 @@ function initDemo3()
   objs.push(world.addStaticBody({ id: "stp1", pos: { u0:  5.25, u1: 5.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
   objs.push(world.addStaticBody({ id: "stp2", pos: { u0: -5.25, u1: 1.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
 
+  const friction = [ 0.75, 0.5, 0.35, 0.1, 0.0 ];
   for (let i = 0; i < 5; i++) {
-    objs.push(world.addDynamicBody({ id: "b" + i, pos: { u0: -7.5 + 2.0 * i, u1: 10 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 25 }));
+    let obj = world.addDynamicBody({ id: "b" + i, pos: { u0: -7.5 + 2.0 * i, u1: 10 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 25 });
+    obj.friction = friction[i];
+    objs.push(obj);
   }
   return { objs: objs, world: world };
 }
