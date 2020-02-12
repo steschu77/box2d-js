@@ -35,16 +35,13 @@ class b2RigidBody {
     this.torque = 0;
 
     this.vertexCount = 4;
-    this.vertices = new Array(4);
-    for (let i = 0; i < 4; i++) {
+    this.vertices = new Array(this.vertexCount);
+    this.normals = new Array(this.vertexCount);
+    for (let i = 0; i < this.vertexCount; i++) {
       this.vertices[i] = new b2Vec2(0, 0);
-    }
-
-    this.normals = new Array(4);
-    for (let i = 0; i < 4; i++) {
       this.normals[i] = new b2Vec2(0, 0);
     }
-    this.update();
+    this.transformShape();
 
     this.mass = mass;
     this.invMass = invMass;
@@ -92,12 +89,12 @@ class b2RigidBody {
     this.force.u1 = 0;
     this.torque = 0;
 
-    this.update();
+    this.transformShape();
   }
 
-  update() {
-    const p = this.position;
+  transformShape() {
 
+    const p = this.position;
     const q_s = Math.sin(this.rotation);
     const q_c = Math.cos(this.rotation);
 
@@ -128,7 +125,5 @@ class b2RigidBody {
       let u1 = q_s * n.u0 + q_c * n.u1;
       this.normals[i].set(u0, u1);
     }, this);
-
-
   }
 }
