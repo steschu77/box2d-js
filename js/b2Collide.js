@@ -20,44 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-class b2BoxDef {
-  constructor(extents) {
-    this.position = new b2Vec2(0.0, 0.0);
-    this.rotation = 0.0;
-    this.friction = 0.2;
-    this.restitution = 0.0;
-    this.extents = extents.copy();
-  }
-}
-
-class b2MassData {
-  constructor(mass, I) {
-    this.mass = mass;
-    this.I = I;
-  }
-}
-
+// ----------------------------------------------------------------------------
 class b2ClipVertex {
   constructor(id, v) {
     this.id = id;
     this.v = v;
   }
-}
-
-// ----------------------------------------------------------------------------
-function b2Interp(v0, v1, t)
-{
-  let u0 = v0.u0 + t * (v1.u0 - v0.u0);
-  let u1 = v0.u1 + t * (v1.u1 - v0.u1);
-  return new b2Vec2(u0, u1);
-}
-
-// ----------------------------------------------------------------------------
-function b2Distance(n, v, x)
-{
-  let u0 = n.u0 * (x.u0 - v.u0);
-  let u1 = n.u1 * (x.u1 - v.u1);
-  return u0 + u1;
 }
 
 // ----------------------------------------------------------------------------
@@ -69,13 +37,13 @@ function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
   if (distance0 > 0.0) {
     let t = distance0 / (distance0 - distance1);
     cv[0].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[0].id.setInEdge1(clipEdge);
-    cv[0].id.resetInEdge2();
+    cv[0].id.in1 = clipEdge;
+    cv[0].id.in2 = 0;
   } else if (distance1 > 0.0) {
     let t = distance0 / (distance0 - distance1);
     cv[1].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[1].id.setOutEdge1(clipEdge);
-    cv[1].id.resetOutEdge2();
+    cv[1].id.out1 = clipEdge;
+    cv[1].id.out2 = 0;
   }
 }
 
@@ -84,6 +52,7 @@ function b2FindMaxSeparation(poly1, poly2, flip) {
   const count1 = poly1.vertexCount;
   const count2 = poly2.vertexCount;
 
+  let bestIndex = 0;
   let maxSeparation = -Number.MAX_VALUE;
   for (var i = 0; i < count1; ++i) {
     const n = poly1.normals[i];
@@ -121,7 +90,7 @@ function b2FindIncidentEdge(refEdge) {
   let minDot = Number.MAX_VALUE;
   let index = 0;
   for (var i = 0; i < count2; ++i) {
-    const dot = b2math.b2Dot(normal1, poly2.normals[i]);
+    const dot = b2Dot(normal1, refEdge.poly2.normals[i]);
     if (dot < minDot) {
       minDot = dot;
       index = i;
@@ -132,14 +101,14 @@ function b2FindIncidentEdge(refEdge) {
   const i2 = i1 + 1 < count2 ? i1 + 1 : 0;
 
   incEdge = [
-    { v: vertices2[i1], id: { i0: edge1, i1: i1 } },
-    { v: vertices2[i2], id: { i0: edge1, i1: i2 } }
+    { v: refEdge.poly2.vertices[i1], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i1 } },
+    { v: refEdge.poly2.vertices[i2], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i2 } }
   ];
   return incEdge;
 }
 
 // ----------------------------------------------------------------------------
-function b2CollidePoly(manifold, polyA, polyB) {
+function b2CollidePoly(polyA, polyB) {
 
   const edgeA = b2FindMaxSeparation(polyA, polyB, 0);
   if (edgeA.maxSeparation > 0) {
@@ -168,18 +137,27 @@ function b2CollidePoly(manifold, polyA, polyB) {
   b2ClipSegmentToLine(incidentEdge, tangent.neg(), v11, iv1);
   b2ClipSegmentToLine(incidentEdge, tangent, v12, iv2);
 
-  let pointCount = 0;
+  let m = new b2Manifold(polyA, polyB);
+
   for (let i = 0; i < 2; ++i) {
-    let separation = b2Distance(normal, v11, incidentEdge[i]);
+    let separation = b2Distance(normal, v11, incidentEdge[i].v);
     if (separation <= 0.0) {
-      let cp = manifold.points[pointCount];
+      let cp = new b2ContactPoint();
       cp.separation = separation;
-      cp.position.SetV(clipPoints2[i].v);
-      cp.normal.SetV(referenceEdge.flip ? normal.neg() : normal);
-      cp.id.Set(referenceEdge.flip ? incidentEdge[i].id.neg() : incidentEdge[i].id);
-      ++pointCount;
+      cp.position = incidentEdge[i].v;
+
+      const id = incidentEdge[i].id;
+      if (referenceEdge.flip) {
+        cp.normal = normal.neg();
+        cp.id = { in1: id.in2, out1: id.out2, in2: id.in1, out2: id.out1 };
+      } else {
+        cp.normal = normal.copy();
+        cp.id = { in1: id.in1, out1: id.out1, in2: id.in2, out2: id.out2 };
+      }
+
+      m.contacts.push(cp);
     }
   }
 
-  manifold.pointCount = pointCount;
-};
+  return m;
+}

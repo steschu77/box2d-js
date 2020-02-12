@@ -20,166 +20,113 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-class b2BoxDef {
-  constructor(extents) {
-    this.position = new b2Vec2(0.0, 0.0);
-    this.rotation = 0.0;
-    this.friction = 0.2;
-    this.restitution = 0.0;
-    this.extents = extents.copy();
-  }
-}
-
-class b2MassData {
-  constructor(mass, I) {
-    this.mass = mass;
-    this.I = I;
-  }
-}
-
-class b2ClipVertex {
-  constructor(id, v) {
-    this.id = id;
-    this.v = v;
+// ----------------------------------------------------------------------------
+class b2ContactPoint {
+  constructor() {
+    this.id = 0;
+    this.separation = 0;
+    this.massNormal = 0;
+    this.massTangent = 0;
+    this.bias = 0;
+    this.Pn = 0;
+    this.Pt = 0;
   }
 }
 
 // ----------------------------------------------------------------------------
-function b2Interp(v0, v1, t)
-{
-  let u0 = v0.u0 + t * (v1.u0 - v0.u0);
-  let u1 = v0.u1 + t * (v1.u1 - v0.u1);
-  return new b2Vec2(u0, u1);
-}
+class b2Manifold {
+  constructor(body1, body2) {
+    this.body1 = body1;
+    this.body2 = body2;
+    this.contacts = [];
+    this.friction = 0.3;
+  }
 
-// ----------------------------------------------------------------------------
-function b2Distance(n, v, x)
-{
-  let u0 = n.u0 * (x.u0 - v.u0);
-  let u1 = n.u1 * (x.u1 - v.u1);
-  return u0 + u1;
-}
+  preStep(inv_dt) {
+    const b1 = this.body1;
+    const b2 = this.body2;
 
-// ----------------------------------------------------------------------------
-function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
+    const k_allowedPenetration = 0.01;
+    const k_biasFactor = 0.2;
 
-  var distance0 = b2Distance(normal, vx, cv[0].v);
-  var distance1 = b2Distance(normal, vx, cv[1].v);
+    this.contacts.forEach(function(c) {
 
-  if (distance0 > 0.0) {
-    let t = distance0 / (distance0 - distance1);
-    cv[0].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[0].id.setInEdge1(clipEdge);
-    cv[0].id.resetInEdge2();
-  } else if (distance1 > 0.0) {
-    let t = distance0 / (distance0 - distance1);
-    cv[1].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[1].id.setOutEdge1(clipEdge);
-    cv[1].id.resetOutEdge2();
+      const normal = c.normal;
+      const tangent = c.normal.perpendicular().neg();
+
+      const r1 = b2SubVV(c.position, b1.position);
+      const r2 = b2SubVV(c.position, b2.position);
+
+      const invMass = b1.invMass + b2.invMass
+
+      // precompute normal mass, tangent mass, and bias.
+      const rn1 = b2Dot(r1, normal);
+      const rn2 = b2Dot(r2, normal);
+      const invN1 = b1.invI * (b2Dot(r1, r1) - rn1 * rn1);
+      const invN2 = b2.invI * (b2Dot(r2, r2) - rn2 * rn2);
+      const kNormal = b1.invMass + b2.invMass + invN1 + invN2;
+      c.massNormal = 1.0 / kNormal;
+
+      const rt1 = b2Dot(r1, tangent);
+      const rt2 = b2Dot(r2, tangent);
+      const invT1 = b1.invI * (b2Dot(r1, r1) - rt1 * rt1);
+      const invT2 = b2.invI * (b2Dot(r2, r2) - rt2 * rt2);
+      let kTangent = b1.invMass + b2.invMass + invT1 + invT2;
+      c.massTangent = 1.0 / kTangent;
+
+      c.bias = -k_biasFactor * inv_dt
+        * Math.min(0.0, c.separation + k_allowedPenetration);
+
+      // apply normal + friction impulse
+      const P_u0 = c.Pn * normal.u0 + c.Pt * tangent.u0;
+      const P_u1 = c.Pn * normal.u1 + c.Pt * tangent.u1;
+      const P = new b2Vec2(P_u0, P_u1);
+
+      b1.applyImpulse(c.position, P.neg());
+      b2.applyImpulse(c.position, P);
+    });
+  }
+
+  applyImpulse() {
+    const b1 = this.body1;
+    const b2 = this.body2;
+
+    this.contacts.forEach(function(c) {
+
+      const normal = c.normal;
+      const tangent = c.normal.perpendicular().neg();
+
+      const vr1 = b1.relativeVelocity(c.position);
+      const vr2 = b2.relativeVelocity(c.position);
+
+      // Relative velocity at contact
+      const dv = b2SubVV(vr2, vr1);
+
+      // Compute normal impulse / friction impulse
+      const vn = b2Dot(dv, normal);
+      const vt = b2Dot(dv, tangent);
+
+      let dPn = c.massNormal * (-vn + c.bias);
+      let dPt = c.massTangent * (-vt);
+
+      // Clamp the accumulated impulses
+      const Pn0 = c.Pn;
+      const Pt0 = c.Pt;
+
+      const maxPt = this.friction * c.Pn;
+      c.Pn = Math.max(Pn0 + dPn, 0.0);
+      c.Pt = Math.min(Math.max(Pt0 + dPt, -maxPt), maxPt);
+
+      dPn = c.Pn - Pn0;
+      dPt = c.Pt - Pt0;
+
+      // Apply contact impulse
+      const P_u0 = dPn * normal.u0 + dPt * tangent.u0;
+      const P_u1 = dPn * normal.u1 + dPt * tangent.u1;
+      const P = new b2Vec2(P_u0, P_u1);
+
+      b1.applyImpulse(c.position, P.neg());
+      b2.applyImpulse(c.position, P);
+    }, this);
   }
 }
-
-// ----------------------------------------------------------------------------
-function b2FindMaxSeparation(poly1, poly2, flip) {
-  const count1 = poly1.vertexCount;
-  const count2 = poly2.vertexCount;
-
-  let maxSeparation = -Number.MAX_VALUE;
-  for (var i = 0; i < count1; ++i) {
-    const n = poly1.normals[i];
-    const v1 = poly1.vertices[i];
-
-    let si = Number.MAX_VALUE;
-    for (var j = 0; j < count2; ++j) {
-      const sij = b2Distance(n, v1, poly2.vertices[j]);
-      if (sij < si) {
-        si = sij;
-      }
-    }
-
-    if (si > maxSeparation) {
-      maxSeparation = si;
-      bestIndex = i;
-    }
-  }
-
-  return {
-    poly1: poly1,
-    poly2: poly2,
-    maxSeparation: maxSeparation,
-    index: bestIndex,
-    flip: flip
-  }
-}
-
-// ----------------------------------------------------------------------------
-function b2FindIncidentEdge(refEdge) {
-
-  const count2 = refEdge.poly2.vertexCount;
-  const normal1 = refEdge.poly1.normals[refEdge.index];
-
-  let minDot = Number.MAX_VALUE;
-  let index = 0;
-  for (var i = 0; i < count2; ++i) {
-    const dot = b2math.b2Dot(normal1, poly2.normals[i]);
-    if (dot < minDot) {
-      minDot = dot;
-      index = i;
-    }
-  }
-
-  const i1 = index;
-  const i2 = i1 + 1 < count2 ? i1 + 1 : 0;
-
-  incEdge = [
-    { v: vertices2[i1], id: { i0: edge1, i1: i1 } },
-    { v: vertices2[i2], id: { i0: edge1, i1: i2 } }
-  ];
-  return incEdge;
-}
-
-// ----------------------------------------------------------------------------
-function b2CollidePoly(arbiter, polyA, polyB) {
-
-  const edgeA = b2FindMaxSeparation(polyA, polyB, 0);
-  if (edgeA.maxSeparation > 0) {
-    return;
-  }
-
-  const edgeB = b2FindMaxSeparation(polyB, polyA, 1);
-  if (edgeB.maxSeparation > 0) {
-    return;
-  }
-
-  const referenceEdge = edgeB.maxSeparation > edgeA.maxSeparation ? edgeB : edgeA;
-  const incidentEdge = b2FindIncidentEdge(referenceEdge);
-
-  const count1 = referenceEdge.poly1.vertexCount;
-  const iv1 = referenceEdge.index;
-  const iv2 = iv1 + 1 < count1 ? iv1 + 1 : 0;
-
-  const vert1s = referenceEdge.poly1.vertices;
-  const norm1s = referenceEdge.poly1.normals;
-  const v11 = vert1s[iv1];
-  const v12 = vert1s[iv2];
-  const normal = norm1s[iv1];
-  const tangent = normal.perpendicular().neg();
-
-  b2ClipSegmentToLine(incidentEdge, tangent.neg(), v11, iv1);
-  b2ClipSegmentToLine(incidentEdge, tangent, v12, iv2);
-
-  let pointCount = 0;
-  for (let i = 0; i < 2; ++i) {
-    let separation = b2Distance(normal, v11, incidentEdge[i]);
-    if (separation <= 0.0) {
-      let cp = manifold.points[pointCount];
-      cp.separation = separation;
-      cp.position.SetV(clipPoints2[i].v);
-      cp.normal.SetV(referenceEdge.flip ? normal.neg() : normal);
-      cp.id.Set(referenceEdge.flip ? incidentEdge[i].id.neg() : incidentEdge[i].id);
-      ++pointCount;
-    }
-  }
-
-  manifold.pointCount = pointCount;
-};

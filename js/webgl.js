@@ -94,8 +94,8 @@ function drawScene(programInfo, bodies)
 
   const bodyMatrix = mat4.create();
   bodies.forEach(function(body) {
-    mat4.fromTranslation(bodyMatrix, [body.pos.u0, body.pos.u1, 0.0]);
-    mat4.rotateZ(bodyMatrix, bodyMatrix, body.rot);
+    mat4.fromTranslation(bodyMatrix, [body.position.u0, body.position.u1, 0.0]);
+    mat4.rotateZ(bodyMatrix, bodyMatrix, body.rotation);
     mat4.scale(bodyMatrix, bodyMatrix, [body.width.u0, body.width.u1, 1.0]);
     mat4.mul(bodyMatrix, projectionMatrix, bodyMatrix);
 
