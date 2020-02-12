@@ -27,8 +27,8 @@ function initDemo1()
 {
   let world = initWorld();
   let objs = [];
-  objs.push(world.addStaticBody({ pos: { u0: 0, u1: -10 }, rot: 0, width: { u0: 100, u1: 20 } }));
-  objs.push(world.addDynamicBody({ pos: { u0: 0, u1: 4 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
+  objs.push(world.addStaticBody({ id: "gnd", pos: { u0: 0, u1: -10 }, rot: 0, width: { u0: 100, u1: 20 } }));
+  objs.push(world.addDynamicBody({ id: "box", pos: { u0: 0, u1: 4 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
   return { objs: objs, world: world };
 }
 
@@ -37,12 +37,12 @@ function initDemo2()
 {
   let world = initWorld();
   let objs = [];
-  objs.push(world.addStaticBody({ pos: { u0: 0, u1: -10 }, rot: 0, width: { u0: 100, u1: 20 } }));
-  objs.push(world.addDynamicBody({ pos: { u0: 0, u1: 4 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
-  objs.push(world.addDynamicBody({ pos: { u0: 0.4, u1: 6 }, rot: 0, width: { u0: 10, u1: 0.1 }, mass: 200 }));
-  objs.push(world.addDynamicBody({ pos: { u0: -2, u1: 8 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 50 }));
-  objs.push(world.addDynamicBody({ pos: { u0: -3, u1: 8 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 50 }));
-  objs.push(world.addDynamicBody({ pos: { u0: 1, u1: 12 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
+  objs.push(world.addStaticBody({ id: "gnd", pos: { u0: 0, u1: -10 }, rot: 0, width: { u0: 100, u1: 20 } }));
+  objs.push(world.addDynamicBody({ id: "b1", pos: { u0: 0, u1: 4 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
+  objs.push(world.addDynamicBody({ id: "b2", pos: { u0: 0.4, u1: 6 }, rot: 0, width: { u0: 10, u1: 0.1 }, mass: 200 }));
+  objs.push(world.addDynamicBody({ id: "b3", pos: { u0: -2, u1: 8 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 50 }));
+  objs.push(world.addDynamicBody({ id: "b4", pos: { u0: -3, u1: 8 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 50 }));
+  objs.push(world.addDynamicBody({ id: "b5", pos: { u0: 2, u1: 12 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 200 }));
   return { objs: objs, world: world };
 }
 
@@ -51,15 +51,15 @@ function initDemo3()
 {
   let world = initWorld();
   let objs = [];
-  objs.push(world.addStaticBody({ pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
-  objs.push(world.addStaticBody({ pos: { u0: -2.0,  u1: 7.0 }, rot: -0.25, width: { u0: 13, u1: 0.25 } }));
-  objs.push(world.addStaticBody({ pos: { u0:  5.25, u1: 5.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
-  objs.push(world.addStaticBody({ pos: { u0:  2.0,  u1: 3.0 }, rot:  0.25, width: { u0: 13, u1: 0.25 } }));
-  objs.push(world.addStaticBody({ pos: { u0: -5.25, u1: 1.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
-  objs.push(world.addStaticBody({ pos: { u0: -2.0, u1: -1.0 }, rot: -0.25, width: { u0: 13, u1: 0.25 } }));
+  objs.push(world.addStaticBody({ id: "gnd", pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
+  objs.push(world.addStaticBody({ id: "frm1", pos: { u0: -2.0,  u1: 7.0 }, rot: -0.25, width: { u0: 13, u1: 0.25 } }));
+  objs.push(world.addStaticBody({ id: "frm2", pos: { u0:  2.0,  u1: 3.0 }, rot:  0.25, width: { u0: 13, u1: 0.25 } }));
+  objs.push(world.addStaticBody({ id: "frm3", pos: { u0: -2.0, u1: -1.0 }, rot: -0.25, width: { u0: 13, u1: 0.25 } }));
+  objs.push(world.addStaticBody({ id: "stp1", pos: { u0:  5.25, u1: 5.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
+  objs.push(world.addStaticBody({ id: "stp2", pos: { u0: -5.25, u1: 1.5 }, rot:  0.0,  width: { u0: 0.25, u1: 1 } }));
 
   for (let i = 0; i < 5; i++) {
-    objs.push(world.addDynamicBody({ pos: { u0: -7.5 + 2.0 * i, u1: 10 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 25 }));
+    objs.push(world.addDynamicBody({ id: "b" + i, pos: { u0: -7.5 + 2.0 * i, u1: 10 }, rot: 0, width: { u0: 0.5, u1: 0.5 }, mass: 25 }));
   }
   return { objs: objs, world: world };
 }
@@ -69,11 +69,11 @@ function initDemo4()
 {
   let world = initWorld();
   let objs = [];
-  objs.push(world.addStaticBody({ pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
+  objs.push(world.addStaticBody({ id: "gnd", pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
 
   for (let i = 0; i < 10; i++) {
     let x = Math.random() * 0.2 - 0.1;
-    objs.push(world.addDynamicBody({ pos: { u0: x, u1: 0.51 + 1.05 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 1 }));
+    objs.push(world.addDynamicBody({ id: "b" + i, pos: { u0: x, u1: 0.51 + 1.05 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 1 }));
   }
   return { objs: objs, world: world };
 }
@@ -83,12 +83,12 @@ function initDemo5()
 {
   let world = initWorld();
   let objs = [];
-  objs.push(world.addStaticBody({ pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
+  objs.push(world.addStaticBody({ id: "gnd", pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } }));
 
   for (let i = 0; i < 12; i++) {
     let x = -6.0 + i * 0.5625;
     for (let j = i; j < 12; j++) {
-      objs.push(world.addDynamicBody({ pos: { u0: x, u1: 0.75 + 2.0 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 10 }));
+      objs.push(world.addDynamicBody({ id: "r"+i+"c"+j, pos: { u0: x, u1: 0.75 + 2.0 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 10 }));
       x += 1.125;
     }
   }

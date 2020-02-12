@@ -22,7 +22,9 @@
 
 // ----------------------------------------------------------------------------
 class b2RigidBody {
-  constructor(pos, rot, width, mass, invMass, invI) {
+  constructor(id, pos, rot, width, mass, invMass, invI) {
+
+    this.id = id;
     this.width = width;
 
     this.position = pos;

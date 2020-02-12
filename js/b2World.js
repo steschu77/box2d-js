@@ -25,20 +25,20 @@ class b2World {
   constructor() {
     this.dynamicBodies = [];
     this.staticBodies = [];
-    this.manifolds = [];
+    this.manifolds = new Map();
   }
 
   addDynamicBody(obj) {
     const width = obj.width;
     const invMass = 1.0 / obj.mass;
     const invI = invMass * 12.0 / (width.u0 * width.u0 + width.u1 * width.u1);
-    let body = new b2RigidBody(obj.pos, obj.rot, obj.width, obj.mass, invMass, invI);
+    let body = new b2RigidBody(obj.id, obj.pos, obj.rot, obj.width, obj.mass, invMass, invI);
     this.dynamicBodies.push(body);
     return body;
   }
 
   addStaticBody(obj) {
-    let body = new b2RigidBody(obj.pos, obj.rot, obj.width, 0, 0, 0);
+    let body = new b2RigidBody(obj.id, obj.pos, obj.rot, obj.width, 0, 0, 0);
     this.staticBodies.push(body);
     return body;
   }
@@ -58,28 +58,47 @@ class b2World {
 
   collisionDetection() {
 
-    this.manifolds = [];
+    let manifolds = new Map();
 
     // dynamic vs. dynamic
     for (let i = 0; i < this.dynamicBodies.length; ++i) {
       for (let j = i + 1; j < this.dynamicBodies.length; ++j) {
-        this.collide(this.dynamicBodies[i], this.dynamicBodies[j]);
+        this.collide(manifolds, this.dynamicBodies[i], this.dynamicBodies[j]);
       }
     }
 
     // dynamic vs. static
     for (let i = 0; i < this.dynamicBodies.length; ++i) {
       for (let j = 0; j < this.staticBodies.length; ++j) {
-        this.collide(this.dynamicBodies[i], this.staticBodies[j]);
+        this.collide(manifolds, this.dynamicBodies[i], this.staticBodies[j]);
       }
+    }
+
+    this.manifolds = manifolds;
+  }
+
+  collide(manifolds, bodyA, bodyB) {
+
+    let new_m = b2CollidePoly(bodyA, bodyB);
+    if (new_m != null) {
+      const key = bodyA.id + ":" + bodyB.id;
+      const old_m = this.manifolds.get(key);
+      if (old_m != null) {
+        this.updateManifold(new_m, old_m);
+      }
+      manifolds.set(key, new_m);
     }
   }
 
-  collide(bodyA, bodyB) {
-    let m = b2CollidePoly(bodyA, bodyB);
-    if (m != null) {
-      this.manifolds.push(m);
-    }
+  updateManifold(new_m, old_m) {
+    new_m.contacts.forEach(function(new_c) {
+      old_m.contacts.forEach(function(old_c) {
+        if (isEqualId(new_c.id, old_c.id)) {
+          new_c.Pn = old_c.Pn;
+          new_c.Pt = old_c.Pt;
+        }
+      });
+    });
   }
 }
 

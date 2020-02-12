@@ -20,10 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+function isEqualId(id1, id2) {
+  return id1.in1 === id2.in1 && id1.out1 === id2.out1
+      && id1.in2 === id2.in2 && id1.out2 === id2.out2;
+}
+
 // ----------------------------------------------------------------------------
 class b2ContactPoint {
   constructor() {
-    this.id = 0;
     this.separation = 0;
     this.massNormal = 0;
     this.massTangent = 0;
