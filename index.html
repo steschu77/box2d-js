@@ -25,5 +25,27 @@
 <script src="js/webgl.js"></script>
 <script src="js/main.js"></script>
 
+<p>
+  Use the buttons below or press <kbd>1</kbd> to <kbd>3</kbd> to switch between different demos.
+</p>
+
+<script>
+  document.addEventListener('keydown', function(event) {
+    let x = event.which || event.keyCode;
+    switch (x) {
+    case 49: demo = initDemo1(); break;
+    case 50: demo = initDemo2(); break;
+    case 51: demo = initDemo3(); break;
+    case 52: demo = initDemo4(); break;
+    case 53: demo = initDemo5(); break;
+    }
+  });
+</script>
+<button onclick="demo = initDemo1()">Demo 1</button>
+<button onclick="demo = initDemo2()">Demo 2</button>
+<button onclick="demo = initDemo3()">Demo 3</button>
+<button onclick="demo = initDemo4()">Demo 4</button>
+<button onclick="demo = initDemo5()">Demo 5</button>
+
 </body>
 </html>
