@@ -46,6 +46,17 @@ class b2Manifold {
     this.friction = 0.3;
   }
 
+  update(old_m) {
+    this.contacts.forEach(function(new_c) {
+      old_m.contacts.forEach(function(old_c) {
+        if (isEqualId(new_c.id, old_c.id)) {
+          new_c.Pn = old_c.Pn;
+          new_c.Pt = old_c.Pt;
+        }
+      });
+    });
+  }
+
   preStep(inv_dt) {
     const b1 = this.body1;
     const b2 = this.body2;

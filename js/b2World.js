@@ -84,21 +84,10 @@ class b2World {
       const key = bodyA.id + ":" + bodyB.id;
       const old_m = this.manifolds.get(key);
       if (old_m != null) {
-        this.updateManifold(new_m, old_m);
+        new_m.update(old_m);
       }
       manifolds.set(key, new_m);
     }
-  }
-
-  updateManifold(new_m, old_m) {
-    new_m.contacts.forEach(function(new_c) {
-      old_m.contacts.forEach(function(old_c) {
-        if (isEqualId(new_c.id, old_c.id)) {
-          new_c.Pn = old_c.Pn;
-          new_c.Pt = old_c.Pt;
-        }
-      });
-    });
   }
 }
 
