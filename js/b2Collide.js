@@ -21,14 +21,6 @@
 // SOFTWARE.
 
 // ----------------------------------------------------------------------------
-class b2ClipVertex {
-  constructor(id, v) {
-    this.id = id;
-    this.v = v;
-  }
-}
-
-// ----------------------------------------------------------------------------
 function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
 
   var distance0 = b2Distance(normal, vx, cv[0].v);

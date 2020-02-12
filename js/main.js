@@ -73,7 +73,7 @@ function initDemo4()
 
   for (let i = 0; i < 10; i++) {
     let x = Math.random() * 0.2 - 0.1;
-    objs.push(world.addDynamicBody({ id: "b" + i, pos: { u0: x, u1: 0.51 + 1.05 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 1 }));
+    objs.push(world.addDynamicBody({ id: "b" + i, pos: { u0: x, u1: -4 + 0.51 + 1.05 * i }, rot: 0, width: { u0: 1, u1: 1 }, mass: 1 }));
   }
   return { objs: objs, world: world };
 }
