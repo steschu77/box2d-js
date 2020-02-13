@@ -44,31 +44,28 @@ function b2FindMaxSeparation(poly1, poly2, flip) {
   const count1 = poly1.vertexCount;
   const count2 = poly2.vertexCount;
 
-  let bestIndex = 0;
-  let maxSeparation = -Number.MAX_VALUE;
-  for (var i = 0; i < count1; ++i) {
+  let sij = new Array(count2);
+  let si = new Array(count1);
+
+  for (let i = 0; i < count1; ++i) {
+
     const n = poly1.normals[i];
     const v1 = poly1.vertices[i];
 
-    let si = Number.MAX_VALUE;
-    for (var j = 0; j < count2; ++j) {
-      const sij = b2Distance(n, v1, poly2.vertices[j]);
-      if (sij < si) {
-        si = sij;
-      }
+    for (let j = 0; j < count2; ++j) {
+      sij[j] = b2Distance(n, v1, poly2.vertices[j]);
     }
 
-    if (si > maxSeparation) {
-      maxSeparation = si;
-      bestIndex = i;
-    }
+    si[i] = sij.reduce((min, x) => x < min ? x : min);
   }
+
+  const index = si.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
 
   return {
     poly1: poly1,
     poly2: poly2,
-    maxSeparation: maxSeparation,
-    index: bestIndex,
+    maxSeparation: si[index],
+    index: index,
     flip: flip
   }
 }
@@ -79,17 +76,13 @@ function b2FindIncidentEdge(refEdge) {
   const count2 = refEdge.poly2.vertexCount;
   const normal1 = refEdge.poly1.normals[refEdge.index];
 
-  let minDot = Number.MAX_VALUE;
-  let index = 0;
-  for (var i = 0; i < count2; ++i) {
-    const dot = b2Dot(normal1, refEdge.poly2.normals[i]);
-    if (dot < minDot) {
-      minDot = dot;
-      index = i;
-    }
+  let dots = new Array(count2);
+
+  for (let i = 0; i < count2; ++i) {
+    dots[i] = b2Dot(normal1, refEdge.poly2.normals[i]);
   }
 
-  const i1 = index;
+  const i1 = dots.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0);
   const i2 = i1 + 1 < count2 ? i1 + 1 : 0;
 
   incEdge = [
