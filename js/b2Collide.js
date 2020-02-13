@@ -23,8 +23,8 @@
 // ----------------------------------------------------------------------------
 function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
 
-  var distance0 = b2Distance(normal, vx, cv[0].v);
-  var distance1 = b2Distance(normal, vx, cv[1].v);
+  const distance0 = b2Distance(normal, vx, cv[0].v);
+  const distance1 = b2Distance(normal, vx, cv[1].v);
 
   if (distance0 > 0.0) {
     let t = distance0 / (distance0 - distance1);
@@ -85,11 +85,10 @@ function b2FindIncidentEdge(refEdge) {
   const i1 = dots.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0);
   const i2 = i1 + 1 < count2 ? i1 + 1 : 0;
 
-  incEdge = [
+  return [
     { v: refEdge.poly2.vertices[i1], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i1 } },
     { v: refEdge.poly2.vertices[i2], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i2 } }
   ];
-  return incEdge;
 }
 
 // ----------------------------------------------------------------------------
