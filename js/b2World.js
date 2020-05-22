@@ -25,6 +25,7 @@ class b2World {
   constructor() {
     this.dynamicBodies = [];
     this.staticBodies = [];
+    this.joints = [];
     this.manifolds = new Map();
   }
 
@@ -43,6 +44,12 @@ class b2World {
     return body;
   }
 
+  addJoint(obj) {
+    let joint = new b2Joint(obj.b1, obj.b2, obj.anchor);
+    this.joints.push(joint);
+    return joint;
+  }
+
   step(dt) {
     const inv_dt = 1.0 / dt;
 
@@ -50,8 +57,10 @@ class b2World {
     this.dynamicBodies.forEach(body => body.addForce(new b2Vec2(0, -10 * body.mass)));
     this.dynamicBodies.forEach(body => body.integrateForces(dt));
     this.manifolds.forEach(manifold => manifold.preStep(inv_dt))
+    this.joints.forEach(joint => joint.preStep(inv_dt))
     for (let i = 0; i < 6; ++i) {
       this.manifolds.forEach(manifold => manifold.applyImpulse())
+      this.joints.forEach(joint => joint.applyImpulse())
     }
     this.dynamicBodies.forEach(body => body.integrateVelocities(dt));
   }

@@ -64,6 +64,29 @@ class b2RigidBody {
     this.angularVelocity += this.invI * (r_u0 * P.u1 - r_u1 * P.u0);
   }
 
+  localPosition(worldPt) {
+    const r_u0 = worldPt.u0 - this.position.u0;
+    const r_u1 = worldPt.u1 - this.position.u1;
+
+    const q_s = Math.sin(-this.rotation);
+    const q_c = Math.cos(-this.rotation);
+
+    let v_u0 = q_c * r_u0 - q_s * r_u1;
+    let v_u1 = q_s * r_u0 + q_c * r_u1;
+
+    return new b2Vec2(v_u0, v_u1);
+  }
+
+  worldPosition(localPt) {
+    const q_s = Math.sin(this.rotation);
+    const q_c = Math.cos(this.rotation);
+
+    let v_u0 = q_c * localPt.u0 - q_s * localPt.u1 + this.position.u0;
+    let v_u1 = q_s * localPt.u0 + q_c * localPt.u1 + this.position.u1;
+
+    return new b2Vec2(v_u0, v_u1);
+  }
+
   relativeVelocity(pt) {
     const r_u0 = pt.u0 - this.position.u0;
     const r_u1 = pt.u1 - this.position.u1;

@@ -52,19 +52,6 @@ class b2Mat22 {
   copy() {
     return new b2Mat22(this.v0, this.v1);
   }
-
-  invert() {
-    const a = this.col1.x;
-    const b = this.col2.x;
-    const c = this.col1.y;
-    const d = this.col2.y;
-    const det = a * d - b * c;
-
-    const invDet = 1.0 / det;
-    let c1 = new b2Vec2(invDet * d, -invDet * c);
-    let c2 = new b2Vec2(-invDet * b, invDet * a);
-    return new b2Mat22(c1, c2);
-  }
 }
 
 function b2Dot(a, b) {
@@ -101,4 +88,14 @@ function b2Distance(n, v, x)
   let u0 = n.u0 * (x.u0 - v.u0);
   let u1 = n.u1 * (x.u1 - v.u1);
   return u0 + u1;
+}
+
+// ----------------------------------------------------------------------------
+function b2Inverse(a, b, c, d) {
+  const det = a * d - b * c;
+
+  const invDet = 1.0 / det;
+  let c1 = new b2Vec2(invDet * d, -invDet * c);
+  let c2 = new b2Vec2(-invDet * b, invDet * a);
+  return new b2Mat22(c1, c2);
 }

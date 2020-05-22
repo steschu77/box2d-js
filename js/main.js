@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-let demo = initDemo2();
+let demo = initDemo6();
 
 // ----------------------------------------------------------------------------
 function initDemo1()
@@ -95,6 +95,22 @@ function initDemo5()
       x += 1.125;
     }
   }
+  return { objs: objs, world: world };
+}
+
+// ----------------------------------------------------------------------------
+function initDemo6()
+{
+  let world = initWorld();
+  let objs = [];
+
+  let gnd = world.addStaticBody({ id: "gnd", pos: { u0:  0.0,  u1: -14 }, rot:  0.0,  width: { u0: 100, u1: 20 } });
+  let pdl = world.addDynamicBody({ id: "pdl", pos: { u0: 9, u1: 11 }, rot: 0, width: { u0: 1, u1: 1 }, mass: 100 });
+
+  objs.push(gnd);
+  objs.push(pdl);
+  world.addJoint({ b1: gnd, b2: pdl, anchor: { u0: 0, u1: 11 } });
+
   return { objs: objs, world: world };
 }
 
