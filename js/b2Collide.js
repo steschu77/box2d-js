@@ -21,21 +21,21 @@
 // SOFTWARE.
 
 // ----------------------------------------------------------------------------
-function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
+function b2ClipSegment(cv, distance0, distance1, clipEdge, idx) {
+  let t = distance0 / (distance0 - distance1);
+  cv[idx].v = b2Interp(cv[0].v, cv[1].v, t);
+  cv[idx].id[idx+0] = clipEdge;
+  cv[idx].id[idx+2] = 0;
+}
 
+// ----------------------------------------------------------------------------
+function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
   const distance0 = b2Distance(normal, vx, cv[0].v);
   const distance1 = b2Distance(normal, vx, cv[1].v);
-
   if (distance0 > 0.0) {
-    let t = distance0 / (distance0 - distance1);
-    cv[0].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[0].id[0] = clipEdge;
-    cv[0].id[2] = 0;
+    b2ClipSegment(cv, distance0, distance1, clipEdge, 0);
   } else if (distance1 > 0.0) {
-    let t = distance0 / (distance0 - distance1);
-    cv[1].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[1].id[1] = clipEdge;
-    cv[1].id[3] = 0;
+    b2ClipSegment(cv, distance0, distance1, clipEdge, 1);
   }
 }
 
