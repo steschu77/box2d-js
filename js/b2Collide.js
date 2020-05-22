@@ -116,10 +116,10 @@ function b2CollidePoly(polyA, polyB) {
   const v11 = vert1s[iv1];
   const v12 = vert1s[iv2];
   const normal = norm1s[iv1];
-  const tangent = normal.perpendicular().neg();
+  const perp = normal.perpendicular();
 
-  b2ClipSegmentToLine(incidentEdge, tangent.neg(), v11, iv1);
-  b2ClipSegmentToLine(incidentEdge, tangent, v12, iv2);
+  b2ClipSegmentToLine(incidentEdge, perp, v11, iv1);
+  b2ClipSegmentToLine(incidentEdge, perp.neg(), v12, iv2);
 
   let m = new b2Manifold(polyA, polyB);
 
