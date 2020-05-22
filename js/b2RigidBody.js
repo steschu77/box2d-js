@@ -78,17 +78,15 @@ class b2RigidBody {
     this.velocity.u0 += dt * this.invMass * this.force.u0;
     this.velocity.u1 += dt * this.invMass * this.force.u1;
     this.angularVelocity += dt * this.invI * this.torque;
+    this.force.u0 = 0;
+    this.force.u1 = 0;
+    this.torque = 0;
   }
 
   integrateVelocities(dt) {
     this.position.u0 += dt * this.velocity.u0;
     this.position.u1 += dt * this.velocity.u1;
     this.rotation += dt * this.angularVelocity;
-
-    this.force.u0 = 0;
-    this.force.u1 = 0;
-    this.torque = 0;
-
     this.transformShape();
   }
 
