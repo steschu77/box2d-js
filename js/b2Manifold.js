@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// ----------------------------------------------------------------------------
 function isEqualId(id1, id2) {
-  return id1.in1 === id2.in1 && id1.out1 === id2.out1
-      && id1.in2 === id2.in2 && id1.out2 === id2.out2;
+  return id1[0] === id2[0] && id1[1] === id2[1]
+      && id1[2] === id2[2] && id1[3] === id2[3];
 }
 
 // ----------------------------------------------------------------------------

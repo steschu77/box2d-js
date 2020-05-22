@@ -29,13 +29,13 @@ function b2ClipSegmentToLine(cv, normal, vx, clipEdge) {
   if (distance0 > 0.0) {
     let t = distance0 / (distance0 - distance1);
     cv[0].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[0].id.in1 = clipEdge;
-    cv[0].id.in2 = 0;
+    cv[0].id[0] = clipEdge;
+    cv[0].id[2] = 0;
   } else if (distance1 > 0.0) {
     let t = distance0 / (distance0 - distance1);
     cv[1].v = b2Interp(cv[0].v, cv[1].v, t);
-    cv[1].id.out1 = clipEdge;
-    cv[1].id.out2 = 0;
+    cv[1].id[1] = clipEdge;
+    cv[1].id[3] = 0;
   }
 }
 
@@ -86,8 +86,8 @@ function b2FindIncidentEdge(refEdge) {
   const i2 = i1 + 1 < count2 ? i1 + 1 : 0;
 
   return [
-    { v: refEdge.poly2.vertices[i1], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i1 } },
-    { v: refEdge.poly2.vertices[i2], id: { in1: 0, out1: 0, in2: refEdge.index, out2: i2 } }
+    { v: refEdge.poly2.vertices[i1], id: [ 0, 0, refEdge.index, i1 ] },
+    { v: refEdge.poly2.vertices[i2], id: [ 0, 0, refEdge.index, i2 ] }
   ];
 }
 
@@ -133,10 +133,10 @@ function b2CollidePoly(polyA, polyB) {
       const id = incidentEdge[i].id;
       if (referenceEdge.flip) {
         cp.normal = normal.neg();
-        cp.id = { in1: id.in2, out1: id.out2, in2: id.in1, out2: id.out1 };
+        cp.id = [ id[2], id[3], id[0], id[1] ];
       } else {
         cp.normal = normal.copy();
-        cp.id = { in1: id.in1, out1: id.out1, in2: id.in2, out2: id.out2 };
+        cp.id = [ id[0], id[1], id[2], id[3] ];
       }
 
       m.contacts.push(cp);
