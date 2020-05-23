@@ -50,20 +50,6 @@ class b2RigidBody {
     this.restitution = 0.0;
   }
 
-  addForce(F) {
-    this.force.u0 += F.u0;
-    this.force.u1 += F.u1;
-  }
-
-  applyImpulse(pt, P) {
-    const r_u0 = pt.u0 - this.position.u0;
-    const r_u1 = pt.u1 - this.position.u1;
-
-    this.velocity.u0 += this.invMass * P.u0;
-    this.velocity.u1 += this.invMass * P.u1;
-    this.angularVelocity += this.invI * (r_u0 * P.u1 - r_u1 * P.u0);
-  }
-
   localPosition(worldPt) {
     const r_u0 = worldPt.u0 - this.position.u0;
     const r_u1 = worldPt.u1 - this.position.u1;
@@ -95,6 +81,20 @@ class b2RigidBody {
     const v_u0 = this.velocity.u0 - av * r_u1;
     const v_u1 = this.velocity.u1 + av * r_u0;
     return new b2Vec2(v_u0, v_u1);
+  }
+
+  applyForce(F) {
+    this.force.u0 += F.u0;
+    this.force.u1 += F.u1;
+  }
+
+  applyImpulse(pt, P) {
+    const r_u0 = pt.u0 - this.position.u0;
+    const r_u1 = pt.u1 - this.position.u1;
+
+    this.velocity.u0 += this.invMass * P.u0;
+    this.velocity.u1 += this.invMass * P.u1;
+    this.angularVelocity += this.invI * (r_u0 * P.u1 - r_u1 * P.u0);
   }
 
   integrateForces(dt) {

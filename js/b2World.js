@@ -54,7 +54,7 @@ class b2World {
     const inv_dt = 1.0 / dt;
 
     this.collisionDetection();
-    this.dynamicBodies.forEach(body => body.addForce(new b2Vec2(0, -10 * body.mass)));
+    this.dynamicBodies.forEach(body => body.applyForce(new b2Vec2(0, -10 * body.mass)));
     this.dynamicBodies.forEach(body => body.integrateForces(dt));
     this.manifolds.forEach(manifold => manifold.preStep(inv_dt))
     this.joints.forEach(joint => joint.preStep(inv_dt))
