@@ -80,8 +80,8 @@ function drawScene(programInfo, bodies)
   const top = zoom;
   const bottom = -zoom;
 
-  const projectionMatrix = mat4.create();
-  mat4.ortho(projectionMatrix, left, right, bottom, top, -1.0, 1.0);
+  const projectionMatrix = glMatrix.mat4.create();
+  glMatrix.mat4.ortho(projectionMatrix, left, right, bottom, top, -1.0, 1.0);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
   gl.vertexAttribPointer(
@@ -92,12 +92,12 @@ function drawScene(programInfo, bodies)
 
   gl.useProgram(programInfo.program);
 
-  const bodyMatrix = mat4.create();
+  const bodyMatrix = glMatrix.mat4.create();
   bodies.forEach(function(body) {
-    mat4.fromTranslation(bodyMatrix, [body.position.u0, body.position.u1, 0.0]);
-    mat4.rotateZ(bodyMatrix, bodyMatrix, body.rotation);
-    mat4.scale(bodyMatrix, bodyMatrix, [body.width.u0, body.width.u1, 1.0]);
-    mat4.mul(bodyMatrix, projectionMatrix, bodyMatrix);
+    glMatrix.mat4.fromTranslation(bodyMatrix, [body.position.u0, body.position.u1, 0.0]);
+    glMatrix.mat4.rotateZ(bodyMatrix, bodyMatrix, body.rotation);
+    glMatrix.mat4.scale(bodyMatrix, bodyMatrix, [body.width.u0, body.width.u1, 1.0]);
+    glMatrix.mat4.mul(bodyMatrix, projectionMatrix, bodyMatrix);
 
     gl.uniformMatrix4fv(
         programInfo.uniformLocations.matrix,
